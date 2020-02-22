@@ -20,6 +20,28 @@ window.onload = function() {
 	map.addIcon(26.231408, 127.685525, "天久")
 	map.addIcon(26.193004, 127.712985, "スタバ", "icon/megane.png", 64)
 	map.on('click', (e) => alert(e.latlng))
+	
+	// SPARQLクエリー
+	var query = `
+		prefix ic: <http://imi.go.jp/ns/core/rdf#>
+		prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+		select ?uri ?name ?lat ?lng {
+			?uri ic:名称 [ ic:表記 ?name ].
+			?uri ic:地理座標 [ ic:緯度 ?lat; ic:経度 ?lng; ].
+			filter(contains(str(?name),'津嘉山'))
+		} limit 100
+	`
+
+	querySPARQL(query, function(data) {
+		var items = data.results.bindings
+		for (var i = 0; i < items.length; i++) {
+			var item = items[i]
+			var lat = item.lat.value
+			var lng = item.lng.value
+			var name = item.name.value
+			map.addIcon(lat, lng, name)
+		}
+	})
 }
 
 </script>
